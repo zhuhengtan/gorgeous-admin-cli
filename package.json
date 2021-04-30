@@ -1,0 +1,26 @@
+{
+  "name": "gorgeous-admin-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "gorgeous-admin-cli": "./index.ts"
+  },
+  "keywords": [
+    "react",
+    "ts",
+    "antd",
+    "admin"
+  ],
+  "author": "zhuhengtan",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^15.0.1"
+  }
+}
