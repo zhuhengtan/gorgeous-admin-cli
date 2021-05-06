@@ -1,7 +1,7 @@
 {
   "name": "gorgeous-admin-cli",
   "version": "1.0.0",
-  "description": "",
+  "description": "The cli for gorgeous-admin",
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -25,5 +25,9 @@
   },
   "devDependencies": {
     "@types/node": "^15.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhuhengtan/gorgeous-admin-cli"
   }
 }
