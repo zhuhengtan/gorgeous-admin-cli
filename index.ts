@@ -8,6 +8,7 @@
 const chalk = require('chalk')
 const { program } = require('commander')
 const shell = require('shelljs')
+const ora = require('ora')
 
 program.version('1.0.0', '-v, --version', '当前版本号')
 
@@ -28,10 +29,19 @@ program.command('create <app-name>')
 
   shell.cp('-R', `${processCwd}/gorgeous-admin-cli/projectTemplate/*`, `./${appName}`)
   shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package.json`)
+
+  const installing = ora({
+    text: "npm安装中..."
+  });
+
   console.log(chalk.green('正在执行 npm i'))
-  shell.exec(`cd ${appName}/ && npm i`)
-  console.log(chalk.green('执行完毕！'))
-  console.log(chalk.green('项目创建成功！Happy hacking!'))
+  installing.color = 'yellow'
+  installing.start()
+  shell.exec(`cd ${appName}/ && npm i`, { silent: true }, ()=>{
+    installing.stop()
+    console.log(chalk.green('执行完毕！'))
+    console.log(chalk.green('项目创建成功！Happy hacking!'))
+  })
 })
 
 
