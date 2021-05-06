@@ -2,7 +2,7 @@
 /*
  * @Date: 2021-04-30 15:06:06
  * @LastEditors: ZHT
- * @LastEditTime: 2021-05-06 18:26:39
+ * @LastEditTime: 2021-05-06 20:27:05
  */
 
 const chalk = require('chalk')
@@ -37,11 +37,16 @@ program.command('create <app-name>')
   console.log(chalk.green('正在执行 npm i'))
   installing.color = 'yellow'
   installing.start()
-  shell.exec(`cd ${appName}/ && npm i`, { silent: true }, ()=>{
-    installing.stop()
-    console.log(chalk.green('执行完毕！'))
-    console.log(chalk.green('项目创建成功！Happy hacking!'))
-  })
+  try{
+    shell.exec(`cd ${appName}/ && npm i`, { silent: true }, ()=>{
+      installing.stop()
+      console.log(chalk.green('npm安装完毕！'))
+      console.log(`命令行运行 cd ${appName} & npm start 即可启动项目`)
+      console.log(chalk.green('项目创建成功！Happy hacking!'))
+    })
+  }catch(e) {
+    console.log(chalk.red(e))
+  }
 })
 
 
