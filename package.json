@@ -20,7 +20,6 @@
   "dependencies": {
     "chalk": "^4.1.1",
     "commander": "^7.2.0",
-    "ejs": "^3.1.6",
     "shelljs": "^0.8.4"
   },
   "devDependencies": {
