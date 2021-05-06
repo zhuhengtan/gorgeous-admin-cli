@@ -17,6 +17,20 @@ module.exports = {
   },
   plugins: [
     {
+      plugin:  require("craco-less"),
+      options: {
+        lessLoaderOptions: {
+          lessOptions: {
+            modifyVars: {
+              'primary-color': '#f18101',
+              'link-color': '#f18101',
+            },
+            javascriptEnabled: true,
+          }
+        }
+      }
+    },
+    {
       plugin: require('craco-plugin-scoped-css'),
     },
   ],

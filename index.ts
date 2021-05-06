@@ -2,7 +2,7 @@
 /*
  * @Date: 2021-04-30 15:06:06
  * @LastEditors: ZHT
- * @LastEditTime: 2021-05-06 10:07:47
+ * @LastEditTime: 2021-05-06 18:26:39
  */
 
 const chalk = require('chalk')
@@ -26,7 +26,7 @@ program.command('create <app-name>')
 
   const processCwd = process.cwd()
 
-  shell.cp('-R', `${processCwd}/gorgeous-admin-cli/template/*`, `./${appName}`)
+  shell.cp('-R', `${processCwd}/gorgeous-admin-cli/projectTemplate/*`, `./${appName}`)
   shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package.json`)
   console.log(chalk.green('正在执行 npm i'))
   shell.exec(`cd ${appName}/ && npm i`)
