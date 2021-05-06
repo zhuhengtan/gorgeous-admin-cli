@@ -38,7 +38,7 @@ program.command('create <app-name>')
   installing.color = 'yellow'
   installing.start()
   try{
-    shell.exec(`cd ${appName}/ && npm i`, { silent: true }, ()=>{
+    shell.exec(`cd ${appName}/ && npm i --force`, { silent: true }, ()=>{
       installing.stop()
       console.log(chalk.green('npm安装完毕！'))
       console.log(`命令行运行 cd ${appName} & npm start 即可启动项目`)
