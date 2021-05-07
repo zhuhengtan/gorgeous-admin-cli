@@ -1,8 +1,9 @@
-#! node
+#!/usr/bin/env node
+
 /*
  * @Date: 2021-04-30 15:06:06
  * @LastEditors: ZHT
- * @LastEditTime: 2021-05-06 20:27:05
+ * @LastEditTime: 2021-05-07 15:25:36
  */
 
 const chalk = require('chalk')
@@ -10,10 +11,11 @@ const { program } = require('commander')
 const shell = require('shelljs')
 const ora = require('ora')
 const downloadGit = require('download-git-repo')
+const packageJson = require('./package-lock.json')
 
 const processCwd = process.cwd()
 
-program.version('1.0.0', '-v, --version', '当前版本号')
+program.version(packageJson.version, '-v, --version', '当前版本号')
 
 program.command('create <app-name>')
 .description('创建项目')

@@ -1,6 +1,6 @@
 {
   "name": "gorgeous-admin-cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "The cli for gorgeous-admin",
   "main": "index.ts",
   "scripts": {
@@ -30,5 +30,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/zhuhengtan/gorgeous-admin-cli"
-  }
+  },
+  "preferGlobal": true
 }
