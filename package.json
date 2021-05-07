@@ -1,6 +1,6 @@
 {
   "name": "gorgeous-admin-cli",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "The cli for gorgeous-admin",
   "main": "index.ts",
   "scripts": {

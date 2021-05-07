@@ -3,7 +3,7 @@
 /*
  * @Date: 2021-04-30 15:06:06
  * @LastEditors: ZHT
- * @LastEditTime: 2021-05-07 15:25:36
+ * @LastEditTime: 2021-05-07 15:30:57
  */
 
 const chalk = require('chalk')
@@ -11,7 +11,7 @@ const { program } = require('commander')
 const shell = require('shelljs')
 const ora = require('ora')
 const downloadGit = require('download-git-repo')
-const packageJson = require('./package-lock.json')
+const packageJson = require('./package.json')
 
 const processCwd = process.cwd()
 
