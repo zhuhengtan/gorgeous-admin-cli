@@ -30,7 +30,7 @@ program.command('create <app-name>')
   // 创建文件夹
   shell.mkdir(appName)
 
-  shell.cp('-R', `${processCwd}/gorgeous-admin-cli/projectTemplate/*`, `./${appName}`)
+  shell.cp('-R', `./projectTemplate/*`, `./${appName}`)
   shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package.json`)
   shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package-lock.json`)
 
