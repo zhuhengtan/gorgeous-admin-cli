@@ -12,8 +12,7 @@ const shell = require('shelljs')
 const ora = require('ora')
 const downloadGit = require('download-git-repo')
 const packageJson = require('./package.json')
-
-const processCwd = process.cwd()
+const path = require('path')
 
 program.version(packageJson.version, '-v, --version', '当前版本号')
 
@@ -30,7 +29,7 @@ program.command('create <app-name>')
   // 创建文件夹
   shell.mkdir(appName)
 
-  shell.cp('-R', `./projectTemplate/*`, `./${appName}`)
+  shell.cp('-R', `${path.resolve(__dirname, './projectTemplate')}/*`, `./${appName}`)
   shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package.json`)
   shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package-lock.json`)
 
@@ -45,8 +44,8 @@ program.command('create <app-name>')
     shell.exec(`cd ${appName}/ && npm i --legacy-peer-deps`, { silent: true }, ()=>{
       installing.stop()
       console.log(chalk.green('npm安装完毕！'))
-      console.log(`命令行运行 cd ${appName} & npm start 即可启动项目`)
       console.log(chalk.green('项目创建成功！Happy hacking!'))
+      console.log(`命令行运行 cd ${appName} & npm start 即可启动项目`)
     })
   }catch(e) {
     console.log(chalk.red(e))
