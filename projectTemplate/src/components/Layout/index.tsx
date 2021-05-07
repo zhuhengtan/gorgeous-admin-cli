@@ -7,7 +7,7 @@ import { matchPath } from 'react-router'
 import store from '@/store'
 import { Footer } from 'antd/lib/layout/layout'
 import { MenuInfo } from '../../../node_modules/rc-menu/lib/interface'
-import './style.module.scss'
+import './style.scoped.scss'
 
 interface BreadcrumbItem {
   path: string
