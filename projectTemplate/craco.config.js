@@ -3,6 +3,14 @@ const path = require('path');
 const pathResolve = (pathUrl) => path.join(__dirname, pathUrl);
 
 module.exports = {
+  devServer: {
+    proxy: {//配置本地测试环境的代理，解决跨域
+      '/api': {
+        target: 'http://192.168.11.121:3001',
+        changeOrigin: true,
+      }
+    },
+  },
   webpack: {
     alias: {
       '@': pathResolve('src'),
@@ -17,7 +25,7 @@ module.exports = {
   },
   plugins: [
     {
-      plugin:  require("craco-less"),
+      plugin: require("craco-less"),
       options: {
         lessLoaderOptions: {
           lessOptions: {

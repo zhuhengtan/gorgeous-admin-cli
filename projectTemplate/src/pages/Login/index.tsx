@@ -12,6 +12,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
   const { login } = useLogin()
 
+  console.log(process.env.REACT_APP_API_HOST)
+
   const onFinish = useCallback(
     async (values: LoginForm) => {
       values.is_inner = 1
