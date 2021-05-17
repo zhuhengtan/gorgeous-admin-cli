@@ -5,7 +5,7 @@
  * @LastEditors: ZHT
  * @LastEditTime: 2021-05-07 15:30:57
  */
-
+const utils = require('./utils.ts')
 const chalk = require('chalk')
 const { program } = require('commander')
 const shell = require('shelljs')
@@ -27,6 +27,7 @@ program.command('create <app-name>')
     interval: 500,
   })
   creating.start()
+
   
   // 判断文件夹是否存在
   if(shell.test('-e', appName)) {
@@ -43,7 +44,7 @@ program.command('create <app-name>')
   creating.text = `${appName}：拉取最新版本模板代码...`
   downloadGit(
     'zhuhengtan/gorgeous-admin',
-    `./projectTemplate/`,
+    `${path.resolve(__dirname, './projectTemplate')}/`,
     (err)=>{
       if(err){
         creating.stop()
@@ -51,7 +52,7 @@ program.command('create <app-name>')
         console.log(chalk.red(`${appName}: 拉取最新代码失败，将用本地模板创建项目，可以手动更新本地模板代码：gorgeous-admin-cli update`))
         creating.text = `${appName}：git拉取失败，使用本地模板创建项目...`
         creating.start()
-        shell.cp('-R', `${path.resolve(__dirname, './projectTemplate')}/*`, `./${appName}`)
+        shell.cp('-rf', `${path.resolve(__dirname, './projectTemplate')}/*`, `${path.resolve(__dirname, './projectTemplate')}/.*`, `./${appName}/`)
         shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package.json`)
         shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package-lock.json`)
 
@@ -64,7 +65,7 @@ program.command('create <app-name>')
         })
       }else{
         creating.text = `${appName}：模板拉取成功，拷贝代码...`
-        shell.cp('-R', `${path.resolve(__dirname, './projectTemplate')}/*`, `./${appName}`)
+        shell.cp('-rf', `${path.resolve(__dirname, './projectTemplate')}/*`, `${path.resolve(__dirname, './projectTemplate')}/.*`, `./${appName}/`)
         shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package.json`)
         shell.sed('-i', 'gorgeous-admin', `${appName}`, `./${appName}/package-lock.json`)
         creating.text = `${appName}：模板拷贝成功...`
@@ -85,7 +86,7 @@ program.command('create <app-name>')
 program.command('update-project-template')
 .description('更新项目模板（从github拉取最新代码(自用)）')
 .alias('update')
-.usage('使用说明：gorgeous-admin-cli updateProjectTemplate')
+.usage('使用说明：gorgeous-admin-cli update-project-template')
 .action(()=>{
   try {
     const updating = ora({
@@ -94,7 +95,7 @@ program.command('update-project-template')
     updating.start()
     downloadGit(
       'zhuhengtan/gorgeous-admin',
-      './projectTemplate/',
+      `${path.resolve(__dirname, './projectTemplate/')}`,
       (err)=>{
         updating.stop()
         if(err){
@@ -104,10 +105,107 @@ program.command('update-project-template')
         }
       }
     )
-
   }catch(e) {
     console.log(e)
   }
+})
+
+program.command('create-page <route>')
+.option('-t, --template <template>', '设置创建页面的模板', 'common')
+.description('创建页面模板')
+.usage('使用说明：全局安装gorgeous-admin-cli之后，在项目根目录使用，一级路由页面：gorgeous-admin-cli create-page demo，二级路由页面：gorgeous-admin-cli create-page demo/list')
+.action((route, options)=>{
+  //判断是否在项目根目录
+  if(!shell.test('-e', 'src') || !shell.test('-f', 'package.json')) {
+    console.log(chalk.red('创建失败：请在项目根目录执行此命令!'))
+    process.exit(0)
+  }
+  const routeArray = route.toLowerCase().split('/')
+  if(routeArray.length>=3) {
+    console.log(chalk.red('创建失败：暂不支持三级及以上路由！'))
+    process.exit(0)
+  }
+
+  // 判断pages文件夹是否存在，不存在则创建
+  if(!shell.test('-e', 'src/pages')) {
+    shell.mkdir('src/pages')
+  }
+
+  // 进入pages文件夹
+  shell.cd('src/pages')
+
+  const routeDepth = routeArray.length
+
+  const componentName = utils.transferFirstCharacterToUpperCase(routeArray[0])
+  // 如果是第一层的路由，判断组件文件夹是否存在，如存在则退出
+  if(shell.test('-e', componentName) && routeDepth === 1){
+    console.log(chalk.red('创建失败：该组件名已存在，请检查！'))
+    process.exit(0)
+  }
+  if(!shell.test('-e', componentName)){
+    shell.mkdir(componentName)
+  }
+  shell.cd(componentName)
+
+  //复制文件并修改文件内容
+  switch(routeDepth) {
+    case 1:
+      {
+        switch(options.template) {
+          case 'common':
+            shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/*')}`, `./`)
+            shell.sed('-i', 'Replace', `${componentName}`, `./index.tsx`)
+            shell.sed('-i', 'replace', `${routeArray[0]}`, `./index.tsx`)
+            shell.sed('-i', 'replace', `${routeArray[0]}`, `./style.scoped.scss`)
+            shell.sed('-i', 'replace', `${routeArray[0]}`, `./store/constants.ts`)
+            break
+        }
+      }
+      break
+    case 2:
+      {
+        // 先看路由的一级layout index是否存在，不存在啧说明store和hooks均不存在
+        if(!shell.test('-f', 'index.tsx')){
+          shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/firstGradeLayout/*')}`, `./`)
+          shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/store')}`, `./`)
+          shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/hooks')}`, `./`)
+          shell.sed('-i', 'Replace', `${componentName}`, `./index.tsx`)
+        }
+
+        // 再看路由的二级组件文件夹是否存在，不存在则创建
+        const secondGradeComponentName = utils.transferFirstCharacterToUpperCase(routeArray[1])
+        if(shell.test('-e', secondGradeComponentName)){
+          console.log(chalk.red('创建失败：该组件文件夹已存在，请检查！'))
+          process.exit(0)
+        }
+        shell.mkdir(secondGradeComponentName)
+
+        switch(options.template) {
+          case 'common':
+            shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/index.tsx')}`, `./${secondGradeComponentName}/`)
+            shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/style.scoped.scss')}`, `./${secondGradeComponentName}/`)
+            shell.sed('-i', 'Replace', `${secondGradeComponentName}`, `./${secondGradeComponentName}/index.tsx`)
+            shell.sed('-i', 'replace', `${routeArray[1]}`, `./${secondGradeComponentName}/index.tsx`)
+            shell.sed('-i', 'replace', `${routeArray[1]}`, `./${secondGradeComponentName}/style.scoped.scss`)
+            shell.sed('-i', 'replace', `${routeArray[1]}`, `./store/constants.ts`)
+            break
+        }
+      }
+      break
+    default:
+      process.exit()
+  }
+  //返回src目录
+  shell.cd('../../')
+
+  // 主store引入组件store
+  shell.sed('-i', "import produce from 'immer'", `import produce from 'immer'\nimport ${routeArray[0]}Reducer from '@/pages/${componentName}/store/reducer'`, './store/reducer.ts')
+  shell.sed('-i', 'common,', `common,\n  ${routeArray[0]}: ${routeArray[0]}Reducer,`, './store/reducer.ts')
+
+  // 读出路由文件
+  // const routes = require('/routes/AllRoutes.tsx')
+  // console.log(routes)
+
 })
 
 program.parse(process.argv)

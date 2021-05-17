@@ -11,7 +11,7 @@
 
 ### 后端
 
-使用golang+gin框架开发
+使用golang+gin框架开发，[后端项目git主页](https://github.com/CryBecase/gorgeous-admin-server-cli)
 
 
 ## 使用
