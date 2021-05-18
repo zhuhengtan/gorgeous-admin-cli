@@ -110,6 +110,11 @@ program.command('update-project-template')
   }
 })
 
+
+/**
+ * 创建页面，参数格式：firstGradeRoute|first-grade-route|FirstGradeRoute (/ secondGradeRoute|second-grade-route|SecondGradeRoute)
+ * 
+ */
 program.command('create-page <route>')
 .option('-t, --template <template>', '设置创建页面的模板', 'common')
 .description('创建页面模板')
@@ -120,7 +125,7 @@ program.command('create-page <route>')
     console.log(chalk.red('创建失败：请在项目根目录执行此命令!'))
     process.exit(0)
   }
-  const routeArray = route.toLowerCase().split('/')
+  const { routeArray, componentArray } = utils.parseRoute(route)
   if(routeArray.length>=3) {
     console.log(chalk.red('创建失败：暂不支持三级及以上路由！'))
     process.exit(0)
@@ -128,7 +133,7 @@ program.command('create-page <route>')
 
   // 判断pages文件夹是否存在，不存在则创建
   if(!shell.test('-e', 'src/pages')) {
-    shell.mkdir('src/pages')
+    shell.mkdir('src/pages') 
   }
 
   // 进入pages文件夹
@@ -136,16 +141,15 @@ program.command('create-page <route>')
 
   const routeDepth = routeArray.length
 
-  const componentName = utils.transferFirstCharacterToUpperCase(routeArray[0])
   // 如果是第一层的路由，判断组件文件夹是否存在，如存在则退出
-  if(shell.test('-e', componentName) && routeDepth === 1){
+  if(shell.test('-e', componentArray[0]) && routeDepth === 1){
     console.log(chalk.red('创建失败：该组件名已存在，请检查！'))
     process.exit(0)
   }
-  if(!shell.test('-e', componentName)){
-    shell.mkdir(componentName)
+  if(!shell.test('-e', componentArray[0])){
+    shell.mkdir(componentArray[0])
   }
-  shell.cd(componentName)
+  shell.cd(componentArray[0])
 
   //复制文件并修改文件内容
   switch(routeDepth) {
@@ -154,7 +158,7 @@ program.command('create-page <route>')
         switch(options.template) {
           case 'common':
             shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/*')}`, `./`)
-            shell.sed('-i', 'Replace', `${componentName}`, `./index.tsx`)
+            shell.sed('-i', 'Replace', `${componentArray[0]}`, `./index.tsx`)
             shell.sed('-i', 'replace', `${routeArray[0]}`, `./index.tsx`)
             shell.sed('-i', 'replace', `${routeArray[0]}`, `./style.scoped.scss`)
             shell.sed('-i', 'replace', `${routeArray[0]}`, `./store/constants.ts`)
@@ -164,29 +168,30 @@ program.command('create-page <route>')
       break
     case 2:
       {
-        // 先看路由的一级layout index是否存在，不存在啧说明store和hooks均不存在
+        // 先看路由的一级layout index是否存在，不存在则说明store和hooks均不存在，需要拷贝
         if(!shell.test('-f', 'index.tsx')){
           shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/firstGradeLayout/*')}`, `./`)
           shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/store')}`, `./`)
           shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/hooks')}`, `./`)
-          shell.sed('-i', 'Replace', `${componentName}`, `./index.tsx`)
+          shell.sed('-i', 'Replace', `${componentArray[0]}`, `./index.tsx`)
+        }else{ //TODO 判断store、hooks文件是否存在，存在的话，往里添加模板内容。
+
         }
 
         // 再看路由的二级组件文件夹是否存在，不存在则创建
-        const secondGradeComponentName = utils.transferFirstCharacterToUpperCase(routeArray[1])
-        if(shell.test('-e', secondGradeComponentName)){
+        if(shell.test('-e', componentArray[1])){
           console.log(chalk.red('创建失败：该组件文件夹已存在，请检查！'))
           process.exit(0)
         }
-        shell.mkdir(secondGradeComponentName)
+        shell.mkdir(componentArray[1])
 
         switch(options.template) {
           case 'common':
-            shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/index.tsx')}`, `./${secondGradeComponentName}/`)
-            shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/style.scoped.scss')}`, `./${secondGradeComponentName}/`)
-            shell.sed('-i', 'Replace', `${secondGradeComponentName}`, `./${secondGradeComponentName}/index.tsx`)
-            shell.sed('-i', 'replace', `${routeArray[1]}`, `./${secondGradeComponentName}/index.tsx`)
-            shell.sed('-i', 'replace', `${routeArray[1]}`, `./${secondGradeComponentName}/style.scoped.scss`)
+            shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/index.tsx')}`, `./${componentArray[1]}/`)
+            shell.cp('-R', `${path.resolve(__dirname, './pageTemplate/common/style.scoped.scss')}`, `./${componentArray[1]}/`)
+            shell.sed('-i', 'Replace', `${componentArray[1]}`, `./${componentArray[1]}/index.tsx`)
+            shell.sed('-i', 'replace', `${routeArray[1]}`, `./${componentArray[1]}/index.tsx`)
+            shell.sed('-i', 'replace', `${routeArray[1]}`, `./${componentArray[1]}/style.scoped.scss`)
             shell.sed('-i', 'replace', `${routeArray[1]}`, `./store/constants.ts`)
             break
         }
@@ -199,13 +204,63 @@ program.command('create-page <route>')
   shell.cd('../../')
 
   // 主store引入组件store
-  shell.sed('-i', "import produce from 'immer'", `import produce from 'immer'\nimport ${routeArray[0]}Reducer from '@/pages/${componentName}/store/reducer'`, './store/reducer.ts')
+  shell.sed('-i', "import produce from 'immer'", `import produce from 'immer'\nimport ${routeArray[0]}Reducer from '@/pages/${componentArray[0]}/store/reducer'`, './store/reducer.ts')
   shell.sed('-i', 'common,', `common,\n  ${routeArray[0]}: ${routeArray[0]}Reducer,`, './store/reducer.ts')
 
-  // 读出路由文件
-  // const routes = require('/routes/AllRoutes.tsx')
-  // console.log(routes)
+  console.log(chalk.green('页面创建完毕，请自行完善路由文件'))
 
+  /**
+   * TODO 添加进路由（比较麻烦，暂时搁浅，手动加入路由）
+   */
+  // 读出路由文件
+  // const routeFile = shell.cat('./src/routes/AllRoutes.tsx')
+  // const routeString = routeFile.match(/\[\][ ]=[ ]([\s\S]*?)\n/)[1]
+  // const routeList = JSON.parse(routeString)
+  // shell.sed('-i', "import Layout from '@/components/Layout'", `import Layout from '@/components/Layout'/nimport ${componentArray[componentArray.length-1]} from '@/pages/${componentArray.join('/')}'`, './src/routes/AllRoutes.tsx')
+
+  // // 循环判断加入route
+  // if(routeDepth===1){
+  //   const isInFirstGradeRoute = routeList.some((item1)=>{
+  //     if(item1.path === '/'+routeArray[0]) {
+  //       return true
+  //     }
+  //     return false
+  //   })
+  //   if(!isInFirstGradeRoute){
+  //     routeList.push({
+  //       path: `/${routeArray[0]}`,
+  //       component: componentArray[0],
+  //     })
+  //     shell.sed('-i', routeString, JSON.stringify(routeList), './src/routes/AllRoutes.tsx')
+  //   }
+  // }else {
+  //   const isInFirstGradeRoute = routeList.some((item1)=>{
+  //     if(item1.path === '/' + routeArray[0]) {//说明第一级路由存在
+  //       const isInSecondGradeRoute = item1.routes && item1.routes.some((item2)=>{
+  //         if(item2.path === '/'+ routeArray.join('/')) {
+  //           return true
+  //         }
+  //         return false
+  //       })
+  //       if(!isInSecondGradeRoute){
+  //         item1.push({
+  //           path: `/${routeArray[0]}`,
+  //           component: componentArray[0],
+  //         })
+  //         shell.sed('-i', routeString, JSON.stringify(routeList), './src/routes/AllRoutes.tsx')
+  //       }
+  //     }
+  //     return false
+  //   })
+
+  //   if(!isInFirstGradeRoute){
+  //     routeList.push({
+  //       path: `/${routeArray[0]}`,
+  //       component: componentArray[0],
+  //     })
+  //     shell.sed('-i', routeString, JSON.stringify(routeList), './src/routes/AllRoutes.tsx')
+  //   }
+  // }
 })
 
 program.parse(process.argv)
